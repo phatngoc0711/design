@@ -1,1 +1,92 @@
+package thainp;
+
+/**
+ * @author ThaiNP
+ * Write file
+ */
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.util.zip.GZIPOutputStream;
+
+import org.supercsv.io.CsvResultSetWriter;
+import org.supercsv.io.ICsvResultSetWriter;
+import org.supercsv.prefs.CsvPreference;
+import org.supercsv.quote.AlwaysQuoteMode;
+
+
+public class WriteFile {
+	
+	private int totalRows = 0;
+	private static final CsvPreference CUSTOMIZE_PREREFERCENCE = new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE).useQuoteMode(new AlwaysQuoteMode()).build();	
+	
+	//Create CSV File
+	protected void Write2File(String strFinalDest, String strFileName, ResultSet objResultSet) throws IOException, SQLException {
+		File CSVFile = new File(strFinalDest, strFileName + ".csv");
+		ICsvResultSetWriter csvWriter = null;
+		
+		if ( ! CSVFile.exists() ) {
+			CSVFile.createNewFile();
+		}
+		
+		csvWriter = new CsvResultSetWriter(new OutputStreamWriter(
+					new FileOutputStream(CSVFile,true), "UTF8"), CUSTOMIZE_PREREFERCENCE);
+		
+		csvWriter.write(objResultSet);
+		totalRows = csvWriter.getRowNumber() - 1;
+		csvWriter.close();
+	}
+	
+	// Create Log File
+	protected void WriteLog2File(String logFolder, String fileName, String logInput) {		
+		
+		File fLogFile = new File(logFolder, fileName.substring(0, fileName.length() - 6) + ".log");
+		PrintWriter logWriter = null;
+		try {
+			logWriter = new PrintWriter(new FileWriter(fLogFile,true));
+			logWriter.write(logInput + "\r\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}				
+		logWriter.close();		
+	}	
+
+	// Compress file
+	protected void CreateZip(String ZipFolder, String CSVFolder, String fileName) throws IOException {
+		
+		byte[] buffer = new byte[2048];
+		File ZipFile = new File(ZipFolder, fileName);
+		File CSVFile = new File(CSVFolder, fileName + ".csv");
+		GZIPOutputStream objGZipFile = new GZIPOutputStream(new FileOutputStream(ZipFile + ".csv.gz.tmp"));		
+		FileInputStream objInput = new FileInputStream(CSVFile);
+		int len = 0;
+		while ((len = objInput.read(buffer)) > 0 ) {
+			objGZipFile.write(buffer, 0, len);
+		}
+		
+		objInput.close();
+		objGZipFile.finish();
+		objGZipFile.close();
+		
+		Path oldFile = Paths.get(ZipFolder + File.separatorChar + fileName + ".csv.gz.tmp");
+		Path newFile = Paths.get(ZipFolder + File.separatorChar + fileName + ".csv.gz");
+		Files.move(oldFile, newFile);
+	}
+	
+	// Get total row of resultset
+	protected int getRowCount() {
+		return totalRows;
+	}
+}
 
