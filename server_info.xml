@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<configuration>
+	<serverName>DVDB04</serverName>
+	<dbName>bqtables_dev_new</dbName>
+	<userName>BOOKEP</userName>
+	<userPass>pekoob</userPass>
+	<srvField>MSDB01</srvField>
+	<linkSrvName>MSDB01</linkSrvName>
+	<linkDbName>mediastore</linkDbName>	
+</configuration>
+
