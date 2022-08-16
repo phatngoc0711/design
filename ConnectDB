@@ -1,1 +1,54 @@
 
+package thainp;
+
+/**
+ * @author ThaiNP
+ * Create connection to DB and return ResultSet
+ */
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class ConnectDB {
+
+	private Connection objConn = null;
+	private ResultSet objResult = null;	
+//	private Statement objStatement = null;
+	
+	public ConnectDB(String DBSrvName, String DBName, String DBUsrName, String DBUsrPass) throws SQLException {
+		String DBConn = "jdbc:sqlserver://" + DBSrvName + ";database=" + DBName;
+		objConn = DriverManager.getConnection(DBConn, DBUsrName, DBUsrPass);
+		
+		if (objConn == null) {           	                     
+            throw new SQLException();
+        }
+	}	
+	
+	// Return data for writing CSV
+	protected ResultSet getResultSet() throws SQLException {        
+		return objResult;
+	}
+	
+	// Close connection to DB Server
+	protected void closeConnection() throws SQLException {
+		if ( objConn == null ) {
+			objConn.close();
+		}
+	}
+	
+	// Get data from database
+	protected void selectData(String strSQL) throws SQLException {
+		Statement objStatement = objConn.createStatement();
+    	objResult = objStatement.executeQuery(strSQL);
+	}	
+
+	// Write time to database
+	protected void changeData(String strSQL) throws SQLException {
+		//		String sql = "UPDATE bq_exec_logs SET bqlg_prev_exec_time = '" + execTime + "' WHERE bqlg_server_name = '" + SrvName + "' AND bqlg_file_name = '" + fileName + "'";		
+		Statement objStatement = objConn.createStatement();
+		objStatement.executeUpdate(strSQL);
+	}	
+}
