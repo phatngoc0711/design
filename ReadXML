@@ -1,1 +1,103 @@
+package thainp;
+
+/**
+ * @author ThaiNP
+ * Get data from XML
+ */
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
+
+public class ReadXML {
+	
+	// Configuration File	
+	private String XMLFile = null;//XML file name
+	private String XMLFilePath = null;		
+	private XMLStreamReader eventReader = null;
+	
+	public ReadXML(String filePath, String fileName) {
+		this.XMLFilePath = filePath;
+		this.XMLFile = fileName;
+	}
+	
+	private XMLStreamReader ReadFromXML() throws FileNotFoundException, XMLStreamException {
+		
+			File xmlFile = new File(XMLFilePath, XMLFile);
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			if ( !xmlFile.exists() ) {
+				throw new FileNotFoundException("ファイルが存在しない");
+			} else {
+				eventReader = factory.createXMLStreamReader( new FileInputStream(xmlFile) );
+			}
+			
+			if ( eventReader == null ) {
+				throw new XMLStreamException("ファイルを開けられない");
+			}
+		 
+		return eventReader;
+	}
+
+	// Get Data corresponding tagName in XML file
+	// tag name là giá trị nằm trong <> 
+	// lấy ra list giá trị nằm giữa <tagName> và </tagName> có trong file xml	
+	protected List<String> getDataByTags(String tagName) throws FileNotFoundException, XMLStreamException {
+		List<String> result = new ArrayList<>();
+		boolean isMatched = false;		
+		XMLStreamReader eventReader = ReadFromXML();		
+		while ( eventReader.hasNext() ) {
+			int eventType = eventReader.next();
+			switch ( eventType ) {
+			case XMLStreamReader.START_ELEMENT:  //1
+				String elementName = eventReader.getLocalName();
+				if ( elementName.equalsIgnoreCase(tagName)) {
+					isMatched = true;
+				}
+				break;
+			case XMLStreamReader.CHARACTERS:    //4
+				if (isMatched) {
+					result.add(eventReader.getText());
+					isMatched = false;
+				}							
+				break;				
+			}				
+		}		
+		return result;
+	}	
+	
+	// Get Data corresponding tagName in XML file
+	// lấy ra list giá trị nằm giữa <tagName> và </tagName> có trong file xml	
+	// lấy giá trị cuối cùng trong list ở trên 
+	// Cải tiến bằng cách lấy giá trị list(size-1)
+	protected String getDataByTag(String tagName) throws FileNotFoundException, XMLStreamException {
+		String result = null;
+		boolean isMatched = false;
+		XMLStreamReader eventReader = ReadFromXML();
+		while( eventReader.hasNext() ) {
+        	int eventType = eventReader.next();        	
+        	switch( eventType ) {
+        	case XMLStreamReader.START_ELEMENT:
+        		String elementName = eventReader.getLocalName();				
+        		if ( elementName.equalsIgnoreCase(tagName) ) {
+        			isMatched = true;
+        		}        		
+        		break;
+    		case XMLStreamReader.CHARACTERS:
+    			if ( isMatched ) {
+    				result = eventReader.getText();
+    				isMatched = false;
+    			}    			
+    			break;
+        	}
+		}
+		return result;
+	}
+}
 
