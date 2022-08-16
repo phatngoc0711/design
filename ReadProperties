@@ -1,1 +1,40 @@
+package thainp;
 
+/**
+ * @author ThaiNP
+ * Get general configuration information
+ */
+
+import java.util.Properties;
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.FileInputStream;
+
+
+public class ReadProperties {
+	
+	private Properties pConf;
+	
+	private static final String CNF_FILE = "config.ini";
+	
+	public ReadProperties(String filePath) {
+		pConf = new Properties();	
+		        
+		File fFile = new File(filePath, CNF_FILE);		
+		if ( fFile.exists() ) {
+			try {
+				
+				InputStream inputStream = new FileInputStream(fFile);
+				pConf.load(inputStream);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}				
+	}
+	// lấy giá trị của strName trong file .ini (Sau dấu bằng) 
+	protected String getPropertyData(String strName) {		
+		return pConf.getProperty(strName);
+	}	
+	
+}
